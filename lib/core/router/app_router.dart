@@ -28,6 +28,7 @@ class _PlaceholderHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: const Key('home_placeholder'),
       appBar: AppBar(title: const Text('Mi Changan')),
       body: const Center(
         child: Text('Mi Changan — en construcción'),
