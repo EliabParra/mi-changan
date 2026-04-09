@@ -1,0 +1,61 @@
+# ─────────────────────────────────────────────
+# Secrets & local environment — NEVER commit
+# ─────────────────────────────────────────────
+.env
+.env.*
+!.env.*.example
+.env.json
+!.env.json.example
+
+# Supabase local service role / service keys
+supabase/.env
+supabase/service_role_key
+
+# ─────────────────────────────────────────────
+# Agent / SDD artifacts (local, engram mode)
+# ─────────────────────────────────────────────
+.atl/
+
+# ─────────────────────────────────────────────
+# Flutter / Dart
+# ─────────────────────────────────────────────
+# Dart tool cache
+.dart_tool/
+.packages
+
+# Pub cache & lock (lock file IS committed for reproducibility)
+.pub-cache/
+
+# Build outputs
+build/
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.DS_Store
+Thumbs.db
+
+# Android local signing / keystore
+*.jks
+*.keystore
+key.properties
+
+# iOS / macOS
+ios/Pods/
+macos/Pods/
+ios/Runner/GeneratedPluginRegistrant.*
+*.xcworkspace/xcuserdata/
+
+# ─────────────────────────────────────────────
+# Docker
+# ─────────────────────────────────────────────
+docker-compose.override.yml
+
+# ─────────────────────────────────────────────
+# Supabase generated / local state
+# ─────────────────────────────────────────────
+supabase/.branches/
+supabase/.temp/
