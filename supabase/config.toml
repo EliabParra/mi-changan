@@ -1,0 +1,53 @@
+# Supabase project configuration
+# Docs: https://supabase.com/docs/guides/cli/config
+
+[project]
+# Replace with your actual Supabase project ref (found in Project Settings → General)
+# e.g. project_id = "abcdefghijklmnop"
+project_id = "your-project-ref-here"
+
+[api]
+# Port for the local Supabase API (when using `supabase start`)
+port = 54321
+
+[db]
+# Port for the local Postgres instance
+port = 54322
+# Postgres major version — keep aligned with hosted project version
+major_version = 15
+
+[studio]
+# Port for Supabase Studio (local dashboard)
+port = 54323
+
+[inbucket]
+# Port for the local email testing inbox
+port = 54324
+
+[storage]
+# File size limit for Storage uploads (bytes)
+file_size_limit = "50MiB"
+
+[auth]
+# Site URL used by Supabase Auth for redirects
+site_url = "http://localhost:3000"
+# JWT expiry in seconds (default: 1 week)
+jwt_expiry = 604800
+# Enable email sign-in
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = false
+
+# Magic link support (per product decisions: both email+password and magic link)
+[auth.email.smtp]
+# No local SMTP configured; uses Inbucket for local testing
+host = "supabase-mail"
+port = 2500
+user = ""
+pass = ""
+admin_email = "admin@email.com"
+sender_name = "Mi Changan"
+
+[analytics]
+enabled = false
