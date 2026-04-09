@@ -1,0 +1,55 @@
+# Build APK — Release on version tag
+# Triggers on push of tags matching v* (e.g. v0.1.0).
+# Injects Supabase credentials from GitHub Secrets into an ephemeral
+# .env.json file that is NEVER committed to the repository.
+name: Build APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    name: Build & Release APK
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write   # required by softprops/action-gh-release to create a release
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run tests
+        run: flutter test
+
+      # Write ephemeral .env.json from GitHub Secrets.
+      # - Uses printf to avoid shell interpolation surprises.
+      # - Restricts read access to the current user (chmod 600) — no secret ever
+      #   lands in the shell environment or in a log line.
+      - name: Prepare ephemeral .env.json
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          printf '{"SUPABASE_URL":"%s","SUPABASE_ANON_KEY":"%s"}\n' \
+            "$SUPABASE_URL" "$SUPABASE_ANON_KEY" > .env.json
+          chmod 600 .env.json
+
+      - name: Build release APK
+        run: flutter build apk --release --dart-define-from-file=.env.json
+
+      - name: Upload APK to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/app/outputs/flutter-apk/app-release.apk

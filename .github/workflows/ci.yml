@@ -1,0 +1,34 @@
+# CI — Pull Request validation
+# Triggers on every PR targeting main or master.
+# Runs analyze + test ONLY — no secrets required.
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  analyze-and-test:
+    name: Analyze & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze (fatal infos)
+        run: flutter analyze --fatal-infos
+
+      - name: Run tests
+        run: flutter test
