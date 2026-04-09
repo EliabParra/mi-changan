@@ -1,0 +1,35 @@
+# Docker Compose for local Flutter development
+# Usage:
+#   docker compose run --rm flutter bash           # interactive shell
+#   docker compose run --rm flutter flutter --version
+#   docker compose run --rm flutter flutter analyze
+#   docker compose run --rm flutter flutter test
+#   docker compose run --rm flutter flutter pub get
+#
+# NOTE: Build commands (flutter build apk) require SUPABASE_URL and
+# SUPABASE_ANON_KEY from .env.json (gitignored). See .env.json.example.
+
+services:
+  flutter:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    image: mi-changan-flutter-dev
+    volumes:
+      # Mount the entire project workspace into /app
+      - .:/app
+      # Persistent pub cache — survives container restarts
+      # Avoids re-downloading packages on every `flutter pub get`
+      - pub_cache:/root/.pub-cache
+    working_dir: /app
+    # Allow passing Dart defines for local builds
+    # Create a local .env.json (gitignored) and pass it here
+    environment:
+      - PUB_CACHE=/root/.pub-cache
+    # Keep stdin open for interactive sessions
+    stdin_open: true
+    tty: true
+
+volumes:
+  pub_cache:
+    name: mi-changan-pub-cache

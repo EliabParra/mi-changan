@@ -1,0 +1,39 @@
+# Dockerfile.dev — Local development shell for Flutter + Android SDK
+# Usage:
+#   docker compose run --rm flutter bash
+#   docker compose run --rm flutter flutter analyze
+#   docker compose run --rm flutter flutter test
+#
+# Base image: ghcr.io/cirruslabs/flutter:stable
+#   - Includes Flutter SDK (stable channel)
+#   - Includes Android SDK (API 34, build-tools 34.0.0)
+#   - Java 17 (openjdk)
+#   - ~2 GB image, maintained by Cirrus CI
+#
+# NOTE: This image is for LOCAL DEV ONLY.
+# CI uses subosito/flutter-action@v2 directly (faster, cached).
+
+FROM ghcr.io/cirruslabs/flutter:stable
+
+# Accept Android SDK licenses non-interactively
+RUN yes | sdkmanager --licenses > /dev/null 2>&1 || true
+
+# Install additional Android SDK components required for builds
+RUN sdkmanager \
+    "platform-tools" \
+    "platforms;android-34" \
+    "build-tools;34.0.0" \
+    "cmdline-tools;latest" \
+    2>/dev/null || true
+
+# Set working directory inside container
+WORKDIR /app
+
+# Warm the pub cache layer (invalidated only if pubspec.yaml changes)
+# We copy only pubspec files here — actual source is mounted at runtime.
+# Note: `pubspec.lock` may not exist on first bootstrap.
+COPY pubspec.yaml ./
+RUN flutter pub get 2>/dev/null || true
+
+# Default command: interactive bash shell
+CMD ["bash"]

@@ -1,0 +1,26 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "build/**"
+  errors:
+    # Treat missing returns as error
+    missing_return: error
+    # Treat dead code as warning
+    dead_code: warning
+
+linter:
+  rules:
+    # Enforce documentation on public APIs
+    public_member_api_docs: false   # disabled until codebase stabilizes
+    # Flutter-specific good practices
+    use_key_in_widget_constructors: true
+    prefer_const_constructors: true
+    prefer_const_constructors_in_immutables: true
+    prefer_const_declarations: true
+    avoid_print: true
+    # Code organization
+    sort_constructors_first: true
+    always_use_package_imports: true
