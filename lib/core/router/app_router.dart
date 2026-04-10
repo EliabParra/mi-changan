@@ -14,8 +14,8 @@
 //       3. Unauthenticated + protected route → '/login'
 //       4. Authenticated + public-only route → '/dashboard'
 //       5. Otherwise → null (allow navigation)
-//   - Placeholder screens for /login, /register, /dashboard carry the widget
-//     Keys expected by Batch C tests. Real screens are injected in Batch D.
+//   - Real screens for /login, /register, /dashboard injected in Batch D.
+//     Widget Keys in each real screen are compatible with Batch C test contracts.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,6 +24,9 @@ import 'package:go_router/go_router.dart';
 import 'package:mi_changan/core/router/route_names.dart';
 import 'package:mi_changan/features/auth/domain/auth_notifier_provider.dart';
 import 'package:mi_changan/features/auth/domain/auth_status.dart';
+import 'package:mi_changan/features/auth/presentation/login_screen.dart';
+import 'package:mi_changan/features/auth/presentation/register_screen.dart';
+import 'package:mi_changan/features/dashboard/presentation/dashboard_screen.dart';
 
 // ── Public routes (no auth required) ─────────────────────────────────────────
 const _publicRoutes = {RouteNames.login, RouteNames.register};
@@ -122,17 +125,17 @@ final List<RouteBase> _routes = [
   GoRoute(
     path: RouteNames.login,
     name: 'login',
-    builder: (_, __) => const _LoginPlaceholder(),
+    builder: (_, __) => const LoginScreen(),
   ),
   GoRoute(
     path: RouteNames.register,
     name: 'register',
-    builder: (_, __) => const _RegisterPlaceholder(),
+    builder: (_, __) => const RegisterScreen(),
   ),
   GoRoute(
     path: RouteNames.dashboard,
     name: 'dashboard',
-    builder: (_, __) => const _DashboardPlaceholder(),
+    builder: (_, __) => const DashboardScreen(),
   ),
 ];
 
@@ -145,7 +148,7 @@ class _RouterNotifier extends ChangeNotifier {
   }
 }
 
-// ── Placeholder screens (replaced in Batch D) ─────────────────────────────────
+// ── Splash screen ─────────────────────────────────────────────────────────────
 
 /// Splash screen shown while session hydrates on startup.
 class SplashScreen extends StatelessWidget {
@@ -156,45 +159,6 @@ class SplashScreen extends StatelessWidget {
     return const Scaffold(
       key: Key('splash_screen'),
       body: Center(child: CircularProgressIndicator()),
-    );
-  }
-}
-
-/// Temporary login placeholder — replaced when auth UI feature is implemented.
-class _LoginPlaceholder extends StatelessWidget {
-  const _LoginPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      key: Key('login_screen'),
-      body: Center(child: Text('Login — en construcción')),
-    );
-  }
-}
-
-/// Temporary register placeholder — replaced when auth UI feature is implemented.
-class _RegisterPlaceholder extends StatelessWidget {
-  const _RegisterPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      key: Key('register_screen'),
-      body: Center(child: Text('Register — en construcción')),
-    );
-  }
-}
-
-/// Temporary dashboard placeholder — replaced when dashboard feature is implemented.
-class _DashboardPlaceholder extends StatelessWidget {
-  const _DashboardPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      key: Key('dashboard_screen'),
-      body: Center(child: Text('Dashboard — en construcción')),
     );
   }
 }

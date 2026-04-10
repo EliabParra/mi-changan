@@ -30,6 +30,11 @@ abstract class AuthClient {
     String? redirectTo,
   });
 
+  Future<void> signUp({
+    required String email,
+    required String password,
+  });
+
   Future<void> signOut();
 
   Stream<AuthState> get onAuthStateChange;
@@ -59,6 +64,14 @@ class SupabaseAuthAdapter implements AuthClient {
     String? redirectTo,
   }) async {
     await _auth.signInWithOtp(email: email, emailRedirectTo: redirectTo);
+  }
+
+  @override
+  Future<void> signUp({
+    required String email,
+    required String password,
+  }) async {
+    await _auth.signUp(email: email, password: password);
   }
 
   @override
@@ -100,6 +113,18 @@ class AuthRepository {
     String? redirectTo,
   }) =>
       _client.signInWithOtp(email: email, redirectTo: redirectTo);
+
+  /// Register a new user with email and password.
+  ///
+  /// On success, Supabase fires a [AuthChangeEvent.signedIn] event which
+  /// the notifier's stream listener converts to [AuthStatus.authenticated].
+  ///
+  /// Throws if the email is already registered or the password is too weak.
+  Future<void> signUp({
+    required String email,
+    required String password,
+  }) =>
+      _client.signUp(email: email, password: password);
 
   /// Sign the current user out and invalidate the local session.
   Future<void> signOut() => _client.signOut();

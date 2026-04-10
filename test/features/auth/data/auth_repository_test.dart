@@ -57,6 +57,14 @@ class FakeAuthClient implements AuthClient {
   }
 
   @override
+  Future<void> signUp({
+    required String email,
+    required String password,
+  }) async {
+    // Not tested in this file — implemented to satisfy AuthClient interface.
+  }
+
+  @override
   Future<void> signOut() async {
     signOutCallCount++;
     if (signOutError != null) throw signOutError!;

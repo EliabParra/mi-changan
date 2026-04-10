@@ -96,6 +96,27 @@ class AuthNotifier extends AsyncNotifier<AuthStatus> {
     }
   }
 
+  /// Register a new user with email and password.
+  ///
+  /// On success, Supabase emits [AuthChangeEvent.signedIn] which drives
+  /// state to [AsyncData(authenticated)] via the stream listener.
+  ///
+  /// Sets [AsyncError] on failure (duplicate email, weak password, etc.).
+  Future<void> register({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      await ref.read(authRepositoryProvider).signUp(
+            email: email,
+            password: password,
+          );
+      // State updated by stream listener — no manual set needed.
+    } catch (e, st) {
+      state = AsyncError(e, st);
+    }
+  }
+
   /// Sign out the current user.
   ///
   /// State transitions to [AsyncData(unauthenticated)] via the stream when

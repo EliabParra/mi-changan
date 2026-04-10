@@ -56,6 +56,14 @@ class FakeAuthClientForNotifier implements AuthClient {
   }
 
   @override
+  Future<void> signUp({
+    required String email,
+    required String password,
+  }) async {
+    // Not needed in notifier tests — satisfies AuthClient interface.
+  }
+
+  @override
   Future<void> signOut() async {
     signOutCallCount++;
     _controller.add(const AuthState(AuthChangeEvent.signedOut, null));
