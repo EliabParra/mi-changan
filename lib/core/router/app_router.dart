@@ -27,6 +27,8 @@ import 'package:mi_changan/features/auth/domain/auth_status.dart';
 import 'package:mi_changan/features/auth/presentation/login_screen.dart';
 import 'package:mi_changan/features/auth/presentation/register_screen.dart';
 import 'package:mi_changan/features/dashboard/presentation/dashboard_screen.dart';
+import 'package:mi_changan/features/maintenance/presentation/maintenance_screen.dart';
+import 'package:mi_changan/features/services/presentation/services_screen.dart';
 
 // ── Public routes (no auth required) ─────────────────────────────────────────
 const _publicRoutes = {RouteNames.login, RouteNames.register};
@@ -136,6 +138,16 @@ final List<RouteBase> _routes = [
     path: RouteNames.dashboard,
     name: 'dashboard',
     builder: (_, __) => const DashboardScreen(),
+  ),
+  GoRoute(
+    path: RouteNames.maintenance,
+    name: 'maintenance',
+    builder: (_, __) => const MaintenanceScreen(),
+  ),
+  GoRoute(
+    path: RouteNames.services,
+    name: 'services',
+    builder: (_, __) => const ServicesScreen(),
   ),
 ];
 

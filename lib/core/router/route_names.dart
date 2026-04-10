@@ -16,4 +16,10 @@ abstract final class RouteNames {
 
   /// Protected routes — require an authenticated session.
   static const String dashboard = '/dashboard';
+
+  /// Maintenance reminders list.
+  static const String maintenance = '/maintenance';
+
+  /// Service records list.
+  static const String services = '/services';
 }
