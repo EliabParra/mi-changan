@@ -74,6 +74,15 @@ git push origin v0.1.0
 
 > Los GitHub Secrets `SUPABASE_URL` y `SUPABASE_ANON_KEY` deben estar configurados en el repositorio antes de hacer un release. Ver [docs/onboarding.md](docs/onboarding.md#configurar-github-secrets).
 
+## Definiciones de tablas (actual)
+
+El código de Wave 2 usa estas tablas en Supabase:
+
+- `maintenance_reminders`
+- `service_records`
+
+Si todavía no existen en tu proyecto Supabase, agregá una migración antes de usar esas pantallas.
+
 ---
 
 ## Estructura del proyecto

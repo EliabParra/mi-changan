@@ -32,3 +32,6 @@ jobs:
 
       - name: Run tests
         run: flutter test
+
+      - name: Focused auth/router + feature domains
+        run: flutter test test/features/auth test/core/router test/features/dashboard test/features/mileage test/features/maintenance test/features/services test/features/projections test/features/tracker test/core/theme

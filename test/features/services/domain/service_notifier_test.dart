@@ -45,11 +45,11 @@ class FakeServiceRepository implements ServiceRepository {
 }
 
 class FakeMaintenanceRepository implements MaintenanceRepository {
-  final List<MaintenanceReminder> _reminders;
-  MaintenanceReminder? lastUpdated;
-
   FakeMaintenanceRepository([List<MaintenanceReminder>? initial])
       : _reminders = List.from(initial ?? []);
+
+  final List<MaintenanceReminder> _reminders;
+  MaintenanceReminder? lastUpdated;
 
   @override
   Future<List<MaintenanceReminder>> fetchReminders(
