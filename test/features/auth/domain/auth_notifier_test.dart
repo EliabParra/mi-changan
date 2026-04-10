@@ -16,7 +16,6 @@ import 'package:supabase_flutter/supabase_flutter.dart'
     show AuthChangeEvent, AuthState;
 import 'package:mi_changan/features/auth/data/auth_repository.dart';
 import 'package:mi_changan/features/auth/data/auth_providers.dart';
-import 'package:mi_changan/features/auth/domain/auth_notifier.dart';
 import 'package:mi_changan/features/auth/domain/auth_notifier_provider.dart';
 import 'package:mi_changan/features/auth/domain/auth_status.dart';
 
@@ -43,7 +42,7 @@ class FakeAuthClientForNotifier implements AuthClient {
     lastSignInPassword = password;
     if (signInError != null) throw signInError!;
     // Emit signedIn event after successful login
-    _controller.add(AuthState(AuthChangeEvent.signedIn, null));
+    _controller.add(const AuthState(AuthChangeEvent.signedIn, null));
   }
 
   @override
@@ -59,7 +58,7 @@ class FakeAuthClientForNotifier implements AuthClient {
   @override
   Future<void> signOut() async {
     signOutCallCount++;
-    _controller.add(AuthState(AuthChangeEvent.signedOut, null));
+    _controller.add(const AuthState(AuthChangeEvent.signedOut, null));
   }
 
   @override
