@@ -14,8 +14,8 @@
 //       3. Unauthenticated + protected route → '/login'
 //       4. Authenticated + public-only route → '/dashboard'
 //       5. Otherwise → null (allow navigation)
-//   - Real screens for /login, /register, /dashboard injected in Batch D.
-//     Widget Keys in each real screen are compatible with Batch C test contracts.
+//   - ShellRoute wraps all protected routes so AppShell (bottom nav) persists
+//     across tab navigation without rebuilding.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,13 +28,26 @@ import 'package:mi_changan/features/auth/presentation/login_screen.dart';
 import 'package:mi_changan/features/auth/presentation/register_screen.dart';
 import 'package:mi_changan/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:mi_changan/features/maintenance/presentation/maintenance_screen.dart';
+import 'package:mi_changan/features/mileage/presentation/mileage_screen.dart';
 import 'package:mi_changan/features/projections/presentation/projections_screen.dart';
 import 'package:mi_changan/features/services/presentation/services_screen.dart';
 import 'package:mi_changan/features/settings/presentation/settings_screen.dart';
 import 'package:mi_changan/features/tracker/presentation/tracker_screen.dart';
+import 'package:mi_changan/shared/widgets/app_shell.dart';
 
 // ── Public routes (no auth required) ─────────────────────────────────────────
 const _publicRoutes = {RouteNames.login, RouteNames.register};
+
+// ── Protected shell route prefixes ───────────────────────────────────────────
+const _shellRoutes = {
+  RouteNames.dashboard,
+  RouteNames.mileage,
+  RouteNames.tracker,
+  RouteNames.maintenance,
+  RouteNames.services,
+  RouteNames.projections,
+  RouteNames.settings,
+};
 
 // ── Guard redirect logic (pure function — easy to test) ───────────────────────
 
@@ -58,6 +71,7 @@ String? _guardRedirect(GoRouterState state, AsyncValue<AuthStatus> authValue) {
     data: (status) {
       final isAuthenticated = status == AuthStatus.authenticated;
       final isPublicRoute = _publicRoutes.contains(location);
+      final isShellRoute = _shellRoutes.contains(location);
 
       if (!isAuthenticated && !isPublicRoute) {
         // Protected route attempted without a session → force login
@@ -75,6 +89,8 @@ String? _guardRedirect(GoRouterState state, AsyncValue<AuthStatus> authValue) {
       if (!isAuthenticated && location == RouteNames.splash) {
         return RouteNames.login;
       }
+      // Authenticated on a shell route that isn't dashboard → allow
+      if (isAuthenticated && isShellRoute) return null;
       return null; // Allow navigation
     },
   );
@@ -137,35 +153,50 @@ final List<RouteBase> _routes = [
     name: 'register',
     builder: (_, __) => const RegisterScreen(),
   ),
-  GoRoute(
-    path: RouteNames.dashboard,
-    name: 'dashboard',
-    builder: (_, __) => const DashboardScreen(),
-  ),
-  GoRoute(
-    path: RouteNames.maintenance,
-    name: 'maintenance',
-    builder: (_, __) => const MaintenanceScreen(),
-  ),
-  GoRoute(
-    path: RouteNames.services,
-    name: 'services',
-    builder: (_, __) => const ServicesScreen(),
-  ),
-  GoRoute(
-    path: RouteNames.projections,
-    name: 'projections',
-    builder: (_, __) => const ProjectionsScreen(),
-  ),
-  GoRoute(
-    path: RouteNames.tracker,
-    name: 'tracker',
-    builder: (_, __) => const TrackerScreen(),
-  ),
-  GoRoute(
-    path: RouteNames.settings,
-    name: 'settings',
-    builder: (_, __) => const SettingsScreen(),
+
+  // ── Protected shell route — all tabs live inside AppShell ────────────────
+  //
+  // ShellRoute renders AppShell as the persistent frame; each sub-route
+  // replaces the body area without rebuilding the bottom nav bar.
+  ShellRoute(
+    builder: (context, state, child) => AppShell(child: child),
+    routes: [
+      GoRoute(
+        path: RouteNames.dashboard,
+        name: 'dashboard',
+        builder: (_, __) => const DashboardBody(),
+      ),
+      GoRoute(
+        path: RouteNames.mileage,
+        name: 'mileage',
+        builder: (_, __) => const MileageBody(),
+      ),
+      GoRoute(
+        path: RouteNames.tracker,
+        name: 'tracker',
+        builder: (_, __) => const TrackerScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.maintenance,
+        name: 'maintenance',
+        builder: (_, __) => const MaintenanceScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.services,
+        name: 'services',
+        builder: (_, __) => const ServicesScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.projections,
+        name: 'projections',
+        builder: (_, __) => const ProjectionsScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.settings,
+        name: 'settings',
+        builder: (_, __) => const SettingsScreen(),
+      ),
+    ],
   ),
 ];
 

@@ -38,6 +38,33 @@ String? validatePassword(String? value) {
   return null;
 }
 
+/// Maps technical Supabase/exception error messages to friendly Spanish text.
+///
+/// Technical SDK error strings are replaced with user-facing Spanish messages.
+/// If the error message is already a friendly string (e.g. set by the notifier
+/// layer), it is returned as-is after stripping the "Exception: " prefix.
+String _friendlyLoginError(Object error) {
+  final raw = error.toString().replaceFirst('Exception: ', '').toLowerCase();
+  if (raw.contains('invalid login credentials') ||
+      raw.contains('invalid credentials')) {
+    return 'Email o contraseña incorrectos. Revisá tus datos.';
+  }
+  if (raw.contains('email not confirmed')) {
+    return 'Confirmá tu email antes de iniciar sesión.';
+  }
+  if (raw.contains('too many requests') || raw.contains('rate limit')) {
+    return 'Demasiados intentos. Esperá unos minutos e intentá de nuevo.';
+  }
+  if (raw.contains('network') || raw.contains('connection')) {
+    return 'Sin conexión. Revisá tu internet e intentá de nuevo.';
+  }
+  // Fallback: strip the "Exception: " prefix so the message is readable.
+  // Avoids leaking raw SDK stacktraces while still surfacing domain-level
+  // messages that may already be user-friendly.
+  final cleaned = error.toString().replaceFirst('Exception: ', '');
+  return cleaned.isEmpty ? 'Ocurrió un error. Intentá de nuevo.' : cleaned;
+}
+
 // ── Screen ────────────────────────────────────────────────────────────────────
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -75,9 +102,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     next.whenOrNull(
       error: (error, _) {
         setState(() => _submitting = false);
-        final msg = error.toString().replaceFirst('Exception: ', '');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(msg)),
+          SnackBar(content: Text(_friendlyLoginError(error))),
         );
       },
       data: (status) {

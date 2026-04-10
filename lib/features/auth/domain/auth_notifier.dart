@@ -9,6 +9,9 @@
 //     session, including deep link callbacks.
 //   - [login()], [sendMagicLink()], [logout()] delegate to the repository
 //     and set [AsyncError] if the call fails.
+//   - [register()] passes emailRedirectTo for mobile deep-link callback and
+//     sets [AuthStatus.pendingEmailConfirmation] when email confirm is ON
+//     (detected by no signedIn event fired synchronously after signUp).
 //   - Magic link send does NOT change auth status — the stream fires when the
 //     deep link completes authentication.
 
@@ -26,6 +29,7 @@ import 'package:mi_changan/features/auth/domain/auth_status.dart';
 ///   AsyncData(*)  →  login error     →  AsyncError
 ///   AsyncData(*)  →  login success   →  AsyncData(authenticated) via stream
 ///   AsyncData(*)  →  logout          →  AsyncData(unauthenticated) via stream
+///   AsyncData(*)  →  register (email confirm ON) → AsyncData(pendingEmailConfirmation)
 class AuthNotifier extends AsyncNotifier<AuthStatus> {
   @override
   Future<AuthStatus> build() async {
@@ -43,7 +47,17 @@ class AuthNotifier extends AsyncNotifier<AuthStatus> {
           completer.complete(status);
         } else {
           // For subsequent events, update state directly
-          state = AsyncData(status);
+          // Don't override pendingEmailConfirmation with unauthenticated
+          // unless it's an explicit signedIn or signedOut event.
+          if (status == AuthStatus.authenticated) {
+            state = AsyncData(status);
+          } else if (status == AuthStatus.unauthenticated) {
+            // Only reset to unauthenticated if we're not in pendingEmailConfirmation
+            final current = state.valueOrNull;
+            if (current != AuthStatus.pendingEmailConfirmation) {
+              state = AsyncData(status);
+            }
+          }
         }
       },
       onError: (Object e, StackTrace st) {
@@ -98,8 +112,15 @@ class AuthNotifier extends AsyncNotifier<AuthStatus> {
 
   /// Register a new user with email and password.
   ///
-  /// On success, Supabase emits [AuthChangeEvent.signedIn] which drives
-  /// state to [AsyncData(authenticated)] via the stream listener.
+  /// Passes [emailRedirectTo] for mobile deep-link confirmation.
+  ///
+  /// When Supabase has email confirmation ON:
+  ///   - signUp() succeeds but no signedIn event is emitted immediately.
+  ///   - We set state to [AsyncData(pendingEmailConfirmation)] so the UI
+  ///     can show a "check your email" message instead of a frozen spinner.
+  ///
+  /// When email confirmation is OFF (auto-confirm):
+  ///   - signUp() causes a signedIn event → state goes to authenticated.
   ///
   /// Sets [AsyncError] on failure (duplicate email, weak password, etc.).
   Future<void> register({
@@ -107,11 +128,29 @@ class AuthNotifier extends AsyncNotifier<AuthStatus> {
     required String password,
   }) async {
     try {
+      // Snapshot the state before the signUp call.
+      final stateBefore = state;
+
       await ref.read(authRepositoryProvider).signUp(
             email: email,
             password: password,
+            redirectTo: 'io.michangan.app://login-callback',
           );
-      // State updated by stream listener — no manual set needed.
+
+      // Give the stream a chance to fire (microtask queue + one frame).
+      await Future.microtask(() {});
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      // If state changed to authenticated, stream already handled it.
+      // If state is unchanged (still unauthenticated = email confirm ON),
+      // set pendingEmailConfirmation to unblock the UI spinner.
+      final stateAfter = state;
+      final stillUnchanged = stateAfter.valueOrNull == stateBefore.valueOrNull &&
+          stateAfter.valueOrNull != AuthStatus.authenticated;
+
+      if (stillUnchanged) {
+        state = const AsyncData(AuthStatus.pendingEmailConfirmation);
+      }
     } catch (e, st) {
       state = AsyncError(e, st);
     }

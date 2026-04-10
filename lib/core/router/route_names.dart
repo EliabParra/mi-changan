@@ -17,6 +17,9 @@ abstract final class RouteNames {
   /// Protected routes — require an authenticated session.
   static const String dashboard = '/dashboard';
 
+  /// Mileage logs list.
+  static const String mileage = '/mileage';
+
   /// Maintenance reminders list.
   static const String maintenance = '/maintenance';
 

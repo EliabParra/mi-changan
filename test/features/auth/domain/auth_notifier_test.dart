@@ -59,6 +59,7 @@ class FakeAuthClientForNotifier implements AuthClient {
   Future<void> signUp({
     required String email,
     required String password,
+    String? redirectTo,
   }) async {
     // Not needed in notifier tests — satisfies AuthClient interface.
   }

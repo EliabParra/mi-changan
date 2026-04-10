@@ -33,6 +33,7 @@ abstract class AuthClient {
   Future<void> signUp({
     required String email,
     required String password,
+    String? redirectTo,
   });
 
   Future<void> signOut();
@@ -70,8 +71,13 @@ class SupabaseAuthAdapter implements AuthClient {
   Future<void> signUp({
     required String email,
     required String password,
+    String? redirectTo,
   }) async {
-    await _auth.signUp(email: email, password: password);
+    await _auth.signUp(
+      email: email,
+      password: password,
+      emailRedirectTo: redirectTo,
+    );
   }
 
   @override
@@ -123,8 +129,13 @@ class AuthRepository {
   Future<void> signUp({
     required String email,
     required String password,
+    String? redirectTo,
   }) =>
-      _client.signUp(email: email, password: password);
+      _client.signUp(
+        email: email,
+        password: password,
+        redirectTo: redirectTo,
+      );
 
   /// Sign the current user out and invalidate the local session.
   Future<void> signOut() => _client.signOut();

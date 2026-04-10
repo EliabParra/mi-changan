@@ -24,6 +24,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:mi_changan/core/providers/current_user_provider.dart';
 import 'package:mi_changan/core/router/app_router.dart';
 import 'package:mi_changan/core/router/route_names.dart';
 import 'package:mi_changan/features/auth/domain/auth_notifier.dart';
@@ -39,6 +40,7 @@ import 'package:mi_changan/features/auth/domain/auth_status.dart';
 Widget buildRouterApp({
   required AsyncValue<AuthStatus> authState,
   String initialLocation = RouteNames.login,
+  String? currentUserId,
 }) {
   final router = buildAppRouter(
     authState: authState,
@@ -47,11 +49,19 @@ Widget buildRouterApp({
   return ProviderScope(
     overrides: [
       authNotifierProvider.overrideWith(() => _FakeAuthNotifier(authState)),
+      currentUserIdProvider.overrideWith((_) => currentUserId),
     ],
     child: MaterialApp.router(
       routerConfig: router,
     ),
   );
+}
+
+Future<void> _pumpRouter(WidgetTester tester) async {
+  // Bounded frames to avoid pumpAndSettle() timeouts with indeterminate loaders.
+  for (var i = 0; i < 12; i++) {
+    await tester.pump(const Duration(milliseconds: 50));
+  }
 }
 
 /// A minimal fake [AuthNotifier] that returns a fixed [AsyncValue<AuthStatus>].
@@ -81,7 +91,7 @@ void main() {
         authState: unauthState,
         initialLocation: RouteNames.login,
       ));
-      await tester.pumpAndSettle();
+      await _pumpRouter(tester);
 
       // The /login route is accessible: login screen key must be present
       expect(find.byKey(const Key('login_screen')), findsOneWidget);
@@ -92,7 +102,7 @@ void main() {
         authState: unauthState,
         initialLocation: RouteNames.register,
       ));
-      await tester.pumpAndSettle();
+      await _pumpRouter(tester);
 
       expect(find.byKey(const Key('register_screen')), findsOneWidget);
     });
@@ -102,12 +112,12 @@ void main() {
         authState: unauthState,
         initialLocation: RouteNames.dashboard,
       ));
-      await tester.pumpAndSettle();
+      await _pumpRouter(tester);
 
       // Guard must redirect to /login
       expect(find.byKey(const Key('login_screen')), findsOneWidget);
       // Dashboard must NOT be visible
-      expect(find.byKey(const Key('dashboard_screen')), findsNothing);
+      expect(find.byKey(const Key('app_shell')), findsNothing);
     });
   });
 
@@ -120,10 +130,11 @@ void main() {
       await tester.pumpWidget(buildRouterApp(
         authState: authState,
         initialLocation: RouteNames.login,
+        currentUserId: 'test-user',
       ));
-      await tester.pumpAndSettle();
+      await _pumpRouter(tester);
 
-      expect(find.byKey(const Key('dashboard_screen')), findsOneWidget);
+      expect(find.byKey(const Key('app_shell')), findsOneWidget);
       expect(find.byKey(const Key('login_screen')), findsNothing);
     });
 
@@ -131,10 +142,11 @@ void main() {
       await tester.pumpWidget(buildRouterApp(
         authState: authState,
         initialLocation: RouteNames.register,
+        currentUserId: 'test-user',
       ));
-      await tester.pumpAndSettle();
+      await _pumpRouter(tester);
 
-      expect(find.byKey(const Key('dashboard_screen')), findsOneWidget);
+      expect(find.byKey(const Key('app_shell')), findsOneWidget);
       expect(find.byKey(const Key('register_screen')), findsNothing);
     });
 
@@ -142,10 +154,11 @@ void main() {
       await tester.pumpWidget(buildRouterApp(
         authState: authState,
         initialLocation: RouteNames.dashboard,
+        currentUserId: 'test-user',
       ));
-      await tester.pumpAndSettle();
+      await _pumpRouter(tester);
 
-      expect(find.byKey(const Key('dashboard_screen')), findsOneWidget);
+      expect(find.byKey(const Key('app_shell')), findsOneWidget);
     });
   });
 

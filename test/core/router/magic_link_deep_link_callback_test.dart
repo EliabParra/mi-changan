@@ -87,6 +87,12 @@ class _ControllableFakeAuthNotifier extends AuthNotifier {
   return (app: app, notifier: fakeNotifier);
 }
 
+Future<void> _pumpRouter(WidgetTester tester) async {
+  for (var i = 0; i < 12; i++) {
+    await tester.pump(const Duration(milliseconds: 50));
+  }
+}
+
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 void main() {
@@ -97,7 +103,7 @@ void main() {
         final (:app, notifier: _) = buildDeepLinkApp();
 
         await tester.pumpWidget(app);
-        await tester.pumpAndSettle();
+        await _pumpRouter(tester);
 
         // Before the deep link token is processed: user sees /login
         expect(find.byKey(const Key('login_screen')), findsOneWidget);
@@ -111,7 +117,7 @@ void main() {
         final (:app, :notifier) = buildDeepLinkApp();
 
         await tester.pumpWidget(app);
-        await tester.pumpAndSettle();
+        await _pumpRouter(tester);
 
         // Precondition: starts on /login (unauthenticated)
         expect(find.byKey(const Key('login_screen')), findsOneWidget);
@@ -119,10 +125,10 @@ void main() {
         // Act: simulate Supabase SDK firing signedIn after deep-link token is processed
         notifier.simulateDeepLinkCallback();
         // Allow _RouterNotifier.notifyListeners() → GoRouter redirect → widget rebuild
-        await tester.pumpAndSettle();
+        await _pumpRouter(tester);
 
-        // Assert: router transparently navigated to /dashboard
-        expect(find.byKey(const Key('dashboard_screen')), findsOneWidget);
+        // Assert: router transparently navigated to protected shell (/dashboard)
+        expect(find.byKey(const Key('app_shell')), findsOneWidget);
         expect(find.byKey(const Key('login_screen')), findsNothing);
       },
     );
@@ -133,7 +139,7 @@ void main() {
         final (:app, :notifier) = buildDeepLinkApp();
 
         await tester.pumpWidget(app);
-        await tester.pumpAndSettle();
+        await _pumpRouter(tester);
 
         // Rapid state transition: simulate deep link arriving while user is
         // still on the login screen (no intermediate navigation)

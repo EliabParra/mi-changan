@@ -60,6 +60,7 @@ class FakeAuthClient implements AuthClient {
   Future<void> signUp({
     required String email,
     required String password,
+    String? redirectTo,
   }) async {
     // Not tested in this file — implemented to satisfy AuthClient interface.
   }

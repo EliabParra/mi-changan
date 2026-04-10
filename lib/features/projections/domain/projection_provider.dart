@@ -11,9 +11,10 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:mi_changan/features/maintenance/domain/maintenance_repository.dart';
 import 'package:mi_changan/features/mileage/domain/mileage_repository.dart';
 import 'package:mi_changan/features/projections/domain/projection_calculator.dart';
-import 'package:mi_changan/features/projections/domain/projection_point.dart';
+import 'package:mi_changan/features/projections/domain/projection_maintenance_composer.dart';
 
 /// Parameter bundle for [projectionsProvider].
 class ProjectionsParams {
@@ -34,21 +35,31 @@ class ProjectionsParams {
   int get hashCode => Object.hash(userId, months);
 }
 
-/// Async provider returning projected [ProjectionPoint]s for a given user.
+/// Async provider returning projection points + maintenance overlays for a user.
 ///
 /// Keyed by [ProjectionsParams] — subscribe per-window:
 ///   - `projectionsProvider(ProjectionsParams(userId: id, months: 1))`
 ///   - `projectionsProvider(ProjectionsParams(userId: id, months: 6))`
 ///   - `projectionsProvider(ProjectionsParams(userId: id, months: 12))`
 final projectionsProvider =
-    FutureProvider.family<List<ProjectionPoint>, ProjectionsParams>(
+    FutureProvider.family<ProjectionViewModel, ProjectionsParams>(
   (ref, params) async {
-    final repo = ref.watch(mileageRepositoryProvider);
-    final logs = await repo.fetchLogs(userId: params.userId);
-    return ProjectionCalculator.project(
+    final mileageRepo = ref.watch(mileageRepositoryProvider);
+    final maintenanceRepo = ref.watch(maintenanceRepositoryProvider);
+
+    final logs = await mileageRepo.fetchLogs(userId: params.userId);
+    final reminders = await maintenanceRepo.fetchReminders(userId: params.userId);
+
+    final points = ProjectionCalculator.project(
       logs: logs,
       months: params.months,
       from: DateTime.now(),
+    );
+
+    return ProjectionMaintenanceComposer.compose(
+      points: points,
+      reminders: reminders,
+      now: DateTime.now(),
     );
   },
 );

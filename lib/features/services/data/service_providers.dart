@@ -14,6 +14,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:mi_changan/core/providers/supabase_provider.dart';
+import 'package:mi_changan/core/sync/data/sync_providers.dart';
+import 'package:mi_changan/features/services/data/offline_first_service_repository.dart';
 import 'package:mi_changan/features/services/data/supabase_service_repository.dart';
 import 'package:mi_changan/features/services/domain/service_repository.dart';
 
@@ -24,4 +26,10 @@ final supabaseServiceRepositoryProvider =
     Provider<ServiceRepository>((ref) {
   final client = ref.watch(supabaseClientProvider);
   return SupabaseServiceRepository(client);
+});
+
+final offlineFirstServiceRepositoryProvider = Provider<ServiceRepository>((ref) {
+  final remote = ref.watch(supabaseServiceRepositoryProvider);
+  final outbox = ref.watch(syncOutboxRepositoryProvider);
+  return OfflineFirstServiceRepository(remote: remote, outbox: outbox);
 });

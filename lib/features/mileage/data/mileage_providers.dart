@@ -14,6 +14,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:mi_changan/core/providers/supabase_provider.dart';
+import 'package:mi_changan/core/sync/data/sync_providers.dart';
+import 'package:mi_changan/features/mileage/data/offline_first_mileage_repository.dart';
 import 'package:mi_changan/features/mileage/data/supabase_mileage_repository.dart';
 import 'package:mi_changan/features/mileage/domain/mileage_repository.dart';
 
@@ -23,4 +25,10 @@ import 'package:mi_changan/features/mileage/domain/mileage_repository.dart';
 final supabaseMileageRepositoryProvider = Provider<MileageRepository>((ref) {
   final client = ref.watch(supabaseClientProvider);
   return SupabaseMileageRepository(client);
+});
+
+final offlineFirstMileageRepositoryProvider = Provider<MileageRepository>((ref) {
+  final remote = ref.watch(supabaseMileageRepositoryProvider);
+  final outbox = ref.watch(syncOutboxRepositoryProvider);
+  return OfflineFirstMileageRepository(remote: remote, outbox: outbox);
 });

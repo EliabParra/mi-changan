@@ -13,9 +13,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:mi_changan/app.dart';
+import 'package:mi_changan/core/providers/current_user_provider.dart';
 import 'package:mi_changan/features/auth/domain/auth_notifier.dart';
 import 'package:mi_changan/features/auth/domain/auth_notifier_provider.dart';
 import 'package:mi_changan/features/auth/domain/auth_status.dart';
+
+Future<void> _pumpRouter(WidgetTester tester) async {
+  for (var i = 0; i < 12; i++) {
+    await tester.pump(const Duration(milliseconds: 50));
+  }
+}
 
 void main() {
   group('App bootstrap', () {
@@ -28,13 +35,14 @@ void main() {
           overrides: [
             authNotifierProvider
                 .overrideWith(() => _FakeUnauthNotifier()),
+            currentUserIdProvider.overrideWith((_) => null),
           ],
           child: const App(),
         ),
       );
 
       // Act: settle all pending frames
-      await tester.pumpAndSettle();
+      await _pumpRouter(tester);
 
       // Assert: login screen is shown as the initial unauthenticated route
       expect(find.byKey(const Key('login_screen')), findsOneWidget);
@@ -50,15 +58,16 @@ void main() {
           overrides: [
             authNotifierProvider
                 .overrideWith(() => _FakeAuthNotifier()),
+            currentUserIdProvider.overrideWith((_) => 'test-user'),
           ],
           child: const App(),
         ),
       );
 
-      await tester.pumpAndSettle();
+      await _pumpRouter(tester);
 
       // Assert: guard redirected /login → /dashboard for authenticated user
-      expect(find.byKey(const Key('dashboard_screen')), findsOneWidget);
+      expect(find.byKey(const Key('app_shell')), findsOneWidget);
       expect(find.byKey(const Key('login_screen')), findsNothing);
     });
   });

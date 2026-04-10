@@ -7,7 +7,10 @@
 ///
 /// - [authenticated]: a valid session exists.
 /// - [unauthenticated]: no session — user must log in.
+/// - [pendingEmailConfirmation]: sign-up completed, waiting for user to
+///   confirm their email before the session is active (email confirm ON).
 enum AuthStatus {
   authenticated,
   unauthenticated,
+  pendingEmailConfirmation,
 }

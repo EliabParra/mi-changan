@@ -10,6 +10,11 @@
 //       • If only `distance` logs → sum all distances as currentKm.
 //   - avgKmPerDay uses the date range between first and last log.
 //   - avgKmPerMonth = avgKmPerDay * 30.
+//   - weeklyKm: sum of distance logs in the last 7 days. If no distance logs
+//     exist but total logs do, it computes the delta between the latest total
+//     reading within the last 7 days and the one just before.
+//   - accumulatedKm: total km driven since first log (sum of all distance
+//     logs). Different from totalKm which mirrors the odometer reading.
 
 import 'package:mi_changan/features/mileage/domain/mileage_log.dart';
 
@@ -20,6 +25,8 @@ class DashboardMetrics {
     required this.totalKm,
     required this.avgKmPerMonth,
     required this.avgKmPerDay,
+    required this.weeklyKm,
+    required this.accumulatedKm,
     this.nextServiceAlertKm,
     this.nextServiceKm,
   });
@@ -29,6 +36,8 @@ class DashboardMetrics {
       : totalKm = 0.0,
         avgKmPerMonth = 0.0,
         avgKmPerDay = 0.0,
+        weeklyKm = 0.0,
+        accumulatedKm = 0.0,
         nextServiceAlertKm = null,
         nextServiceKm = null;
 
@@ -44,7 +53,9 @@ class DashboardMetrics {
         totalKm: 0.0,
         avgKmPerMonth: 0.0,
         avgKmPerDay: 0.0,
-        nextServiceAlertKm: nextServiceKm,
+        weeklyKm: 0.0,
+        accumulatedKm: 0.0,
+        nextServiceAlertKm: nextServiceKm != null ? 0.0 : null,
         nextServiceKm: nextServiceKm,
       );
     }
@@ -86,10 +97,44 @@ class DashboardMetrics {
     final double? alertKm =
         nextServiceKm != null ? (nextServiceKm - currentKm) : null;
 
+    // ── accumulatedKm: sum of ALL distance logs ───────────────────────────
+    final double accumulatedKm =
+        distanceLogs.fold(0.0, (s, l) => s + l.valueKm);
+
+    // ── weeklyKm: sum of distance logs in last 7 days; if none, use total
+    //             reading delta within the last 7 days.
+    final now = DateTime.now().toUtc();
+    final weekAgo = now.subtract(const Duration(days: 7));
+
+    final distanceWeekly = distanceLogs
+        .where((l) => l.recordedAt.isAfter(weekAgo))
+        .fold(0.0, (s, l) => s + l.valueKm);
+
+    double weeklyKm;
+    if (distanceWeekly > 0 || distanceLogs.isNotEmpty) {
+      weeklyKm = distanceWeekly;
+    } else if (totalLogs.length >= 2) {
+      // Fall back to delta between latest reading this week vs before
+      final recentTotals =
+          totalLogs.where((l) => l.recordedAt.isAfter(weekAgo)).toList();
+      final olderTotals =
+          totalLogs.where((l) => !l.recordedAt.isAfter(weekAgo)).toList();
+      if (recentTotals.isNotEmpty && olderTotals.isNotEmpty) {
+        weeklyKm = recentTotals.last.valueKm - olderTotals.last.valueKm;
+        if (weeklyKm < 0) weeklyKm = 0;
+      } else {
+        weeklyKm = 0.0;
+      }
+    } else {
+      weeklyKm = 0.0;
+    }
+
     return DashboardMetrics(
       totalKm: currentKm,
       avgKmPerMonth: avgMonth,
       avgKmPerDay: avgDay,
+      weeklyKm: weeklyKm,
+      accumulatedKm: accumulatedKm,
       nextServiceAlertKm: alertKm,
       nextServiceKm: nextServiceKm,
     );
@@ -105,6 +150,12 @@ class DashboardMetrics {
 
   /// Average km driven per day (estimated from log date range).
   final double avgKmPerDay;
+
+  /// Total km driven in the last 7 days (weekly summary).
+  final double weeklyKm;
+
+  /// Total accumulated km from all distance logs (or 0 if only total logs).
+  final double accumulatedKm;
 
   /// Km remaining until next scheduled service (null if no service set).
   final double? nextServiceAlertKm;

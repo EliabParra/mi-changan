@@ -9,6 +9,8 @@
 //   - Avg is computed as (latestKm - earliestKm) / elapsedMonths.
 //   - project() returns N points starting from `from + 1 month`.
 //   - Returns empty list when input logs are empty or insufficient.
+//   - dateToReachKm(): returns null when avg is 0 or target already reached.
+//   - kmAtDate(): returns null when avg is 0 or date is in the past.
 
 import 'package:mi_changan/features/mileage/domain/mileage_log.dart';
 import 'package:mi_changan/features/projections/domain/projection_point.dart';
@@ -63,6 +65,51 @@ abstract final class ProjectionCalculator {
       final estimatedKm = startKm + avgPerMonth * (i + 1);
       return ProjectionPoint(month: pointMonth, estimatedKm: estimatedKm);
     });
+  }
+
+  /// Calculates the estimated date when the odometer will reach [targetKm].
+  ///
+  /// [from] — reference date (typically today).
+  /// Returns null when:
+  ///   - avg km/month is 0 (insufficient data),
+  ///   - target is already at or below current odometer.
+  static DateTime? dateToReachKm({
+    required List<MileageLog> logs,
+    required double targetKm,
+    required DateTime from,
+  }) {
+    final avg = computeAvgKmPerMonth(logs);
+    if (avg <= 0) return null;
+
+    final currentKm = _latestTotalKm(logs);
+    if (targetKm <= currentKm) return null;
+
+    final monthsNeeded = (targetKm - currentKm) / avg;
+    final daysNeeded = (monthsNeeded * _daysPerMonth).round();
+    return from.add(Duration(days: daysNeeded));
+  }
+
+  /// Estimates the odometer reading at [targetDate].
+  ///
+  /// [from] — reference date (typically today).
+  /// Returns null when:
+  ///   - avg km/month is 0 (insufficient data),
+  ///   - [targetDate] is not after [from].
+  static double? kmAtDate({
+    required List<MileageLog> logs,
+    required DateTime targetDate,
+    required DateTime from,
+  }) {
+    if (!targetDate.isAfter(from)) return null;
+
+    final avg = computeAvgKmPerMonth(logs);
+    if (avg <= 0) return null;
+
+    final currentKm = _latestTotalKm(logs);
+    final daysDelta = targetDate.difference(from).inDays.toDouble();
+    final monthsDelta = daysDelta / _daysPerMonth;
+
+    return currentKm + avg * monthsDelta;
   }
 
   // ── Private helpers ──────────────────────────────────────────────────────
