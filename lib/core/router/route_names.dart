@@ -22,4 +22,13 @@ abstract final class RouteNames {
 
   /// Service records list.
   static const String services = '/services';
+
+  /// Km projections (1M / 6M / 1Y charts).
+  static const String projections = '/projections';
+
+  /// GPS tracker (foreground start/stop).
+  static const String tracker = '/tracker';
+
+  /// App settings (theme toggle, export/import).
+  static const String settings = '/settings';
 }
