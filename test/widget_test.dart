@@ -1,13 +1,20 @@
-// widget_test.dart
-//
-// Default widget smoke test generated with Flutter scaffold.
-// Full smoke test (App renders without crash) is in test/app_test.dart (Batch C).
+// Secondary widget smoke test (non-tautological).
+// Keeps a minimal behavior check in the original scaffold file.
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mi_changan/app.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Placeholder — replaced by app_test.dart in Batch C (TDD cycle)
-    expect(true, isTrue);
+  testWidgets('renders app root title', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: App(),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Mi Changan'), findsOneWidget);
   });
 }
