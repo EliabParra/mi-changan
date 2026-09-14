@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "skills": {
+    "flutter-architecting-apps": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "computedHash": "eb8640b807ea631973fa259880abf07d0cb0f26d327da9970e56fbfc95650ada"
+    },
+    "flutter-implementing-navigation-and-routing": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "computedHash": "1ac3fdf915c37ddf8acd943c316e3119dc1436f159b3d8d7f5a4c70eaa1583bd"
+    },
+    "flutter-managing-state": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "computedHash": "4ae2c7b298e4da58029e4318efa4d009ff517021296c93b6bcc1c051a5a10085"
+    },
+    "flutter-testing-apps": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "computedHash": "a27066ec569ff16a1af847c8a13ef7411375d01ab9f768708822c4d993ab52ac"
+    },
+    "flutter-theming-apps": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "computedHash": "06d864f1951a562f98b00b04f12ae492e3b0e7ddfbef7254f87358c57375a21a"
+    },
+    "flutter-working-with-databases": {
+      "source": "flutter/skills",
+      "sourceType": "github",
+      "computedHash": "37ca76b0ec9e681b9b1d58f788f3ff1338a924ed1247983f6adf6c302d44887b"
+    },
+    "supabase-postgres-best-practices": {
+      "source": "supabase/agent-skills",
+      "sourceType": "github",
+      "computedHash": "9c87c315aed143ee3b34bec8117100f5035e0df09e6b23e1ecc772cff434c9ad"
+    },
+    "systematic-debugging": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "72e9ab72627e4fd8ed26a582e82309a98ecdc4f6e1c99418430ac05682c9e91d"
+    },
+    "test-driven-development": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "126f1ebf6ccd414f42544f6e83d8cc5adb089e1108eaffb7c400701e37eecd9f"
+    },
+    "verification-before-completion": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "9b446f0c7fe1cfb560b1d34439523b1a76d5f177290007b2c053a1c749a4a8ba"
+    },
+    "writing-plans": {
+      "source": "obra/superpowers",
+      "sourceType": "github",
+      "computedHash": "bfaed11054ad8021c66860244e2d2e0d1eca483ae9f5fbfcb956e99c61f5c3d7"
+    }
+  }
+}
